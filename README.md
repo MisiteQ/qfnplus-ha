@@ -33,18 +33,6 @@
 3. 最终目录结构应为 `/config/custom_components/qfnplus/{__init__.py, manifest.json, ...}`
 4. **重启 Home Assistant**（设置 → 系统 → 右上角重启）。改代码后必须重启，UI 里的“重新加载”不会重新导入 Python 模块。
 
-## 从 0.1.x（qfnos）迁移到 0.2.0（qfnplus）
-
-domain 从 `qfnos` 改为 `qfnplus`，**两者不能共存**，需按顺序完整迁移：
-
-1. 在 HA 里**删除旧的 Q飞牛+ 集成条目**（设置 → 设备与服务 → Q飞牛+ → 删除）。
-2. 删除旧目录：`/config/custom_components/qfnos`（整个文件夹）。
-3. 解压新包，把 `qfnplus/` 放入 `/config/custom_components/`。
-4. **完整重启 Home Assistant**。
-5. 重新添加集成（设置 → 设备与服务 → 添加集成 → 搜索 Q飞牛+），重填地址与口令。
-6. 旧实体的历史记录**不会迁移**，新实体从零开始记录（unique_id 以新配置条目 ID 为前缀）。
-7. ⚠️ 不要把 `qfnos` 和 `qfnplus` 同时保留在 `custom_components` 下，避免 domain 冲突。
-
 ## 配置
 
 设置 → 设备与服务 → 添加集成 → 搜索 **Q飞牛+**：
@@ -104,20 +92,6 @@ domain 从 `qfnos` 改为 `qfnplus`，**两者不能共存**，需按顺序完�
 | 读速率 / 写速率 | `disk_{盘名}_read_rate / write_rate` | `diskio[]` | [诊断]；IOPS/队列深度在属性里 |
 
 > 容器聚合只做整层计数，不展开单容器（预留以后 opt-in 展开）。
-
-## 仪表盘更新指引（0.1.x → 0.2.0）
-
-旧实体 ID 由 HA 自动生成（`q_nas_*` / `nvme0n1_disk_nvme0n1_*` 形态），0.2.0 统一为 `qfnplus_*`，仪表盘 YAML 需批量替换：
-
-| 旧 entity_id | 新 entity_id |
-|---|---|
-| `sensor.q_nas_cpu_usage`（及全部 `q_nas_*` 主设备实体） | 同名去旧前缀：`sensor.qfnplus_cpu_usage` |
-| `sensor.q_nas_volume_vol1_used` | `sensor.qfnplus_volume_vol1_used` |
-| `sensor.q_nas_eno1_download / upload` | `sensor.qfnplus_nic_eno1_rx_rate / tx_rate` |
-| `sensor.nvme0n1_disk_nvme0n1_temperature` | `sensor.qfnplus_disk_nvme0n1_temperature` |
-| `binary_sensor.nvme0n1_disk_nvme0n1_health` | `binary_sensor.qfnplus_disk_nvme0n1_health` |
-
-建议新增引用（原仪表盘没有）：`sensor.qfnplus_docker_running / docker_stopped / docker_abnormal`、`binary_sensor.qfnplus_docker_problem`、`sensor.qfnplus_disk_io_read_rate / write_rate`、`sensor.qfnplus_gpu_<名称>_utilization`、`sensor.qfnplus_nic_<iface>_total_rx / total_tx`、`sensor.qfnplus_disk_<盘名>_power_on_hours`。
 
 ## 排错
 
