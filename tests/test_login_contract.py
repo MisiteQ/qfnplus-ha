@@ -104,6 +104,11 @@ def _mock_app() -> web.Application:
 @pytest.fixture
 async def mock_fnmonitor():
     """本地 fnmonitor 模拟服务（127.0.0.1 随机端口，即 IP 主机）。"""
+    import pytest_socket
+
+    # PHCC 在 pytest_runtest_setup 全局 disable_socket；本 fixture 需真实回环 socket。
+    # fixture 在 runtest_setup 之后执行，此处恢复即可（仅影响本文件契约测试）。
+    pytest_socket.enable_socket()
     runner = web.AppRunner(_mock_app())
     await runner.setup()
     site = web.TCPSite(runner, "127.0.0.1", 0)

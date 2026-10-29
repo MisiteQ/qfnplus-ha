@@ -1,19 +1,21 @@
 # Q飞牛+ (QFN+ · fnOS Monitor)
 
-[![Validate](https://github.com/MisiteQ/qfnplus-ha/actions/workflows/validate.yaml/badge.svg)](https://github.com/MisiteQ/qfnplus-ha/actions/workflows/validate.yaml)
+<p>
+  <img alt="Version" src="https://img.shields.io/badge/version-0.2.1-blue">
+  <img alt="Home Assistant" src="https://img.shields.io/badge/Home%20Assistant-2026.10%2B-blue">
+  <img alt="HACS" src="https://img.shields.io/badge/HACS-custom-orange">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-orange">
+</p>
 
-**Q飞牛+** 是一个 Home Assistant 自定义集成，把飞牛 fnOS 上 [fnmonitor](https://github.com/MisiteQ/fnmonitor)（v2.20.0）采集的 NAS 运行状态接入 HA 仪表盘：CPU、内存、Swap、负载、存储卷容量、物理盘温度/健康/SMART 诊断、磁盘 IO、GPU、Docker 容器聚合、网络速率与累计流量、整机温度、风扇、功耗/用电等。纯只读，不调用任何控制接口。
+飞牛 fnOS NAS 运行状态接入 Home Assistant 的自定义集成：数据源为 fnOS 上的 [fnmonitor](https://github.com/MisiteQ/fnmonitor)（v2.20.0），覆盖 CPU、内存、Swap、负载、存储卷容量、物理盘温度/健康/SMART 诊断、磁盘 IO、GPU、Docker 容器聚合、网络速率与累计流量、整机温度、风扇、功耗/用电等。**纯只读**，不调用任何控制接口。
 
-作者：**[MisiteQ](https://github.com/MisiteQ)**（fnmonitor 同作者）· 仓库：[MisiteQ/qfnplus-ha](https://github.com/MisiteQ/qfnplus-ha) · 问题反馈：[Issues](https://github.com/MisiteQ/qfnplus-ha/issues)
+- 当前版本：**v0.2.1**
+- 作者：**Misite齊**（[MisiteQ](https://github.com/MisiteQ)，fnmonitor 同作者）
+- 适用平台：Home Assistant **2026.10+**（HAOS / Container / Core）
+- 集成 domain：**`qfnplus`** · 实体前缀 `qfnplus_`
+- 问题反馈：[Issues](https://github.com/MisiteQ/qfnplus-ha/issues)
 
-## 命名说明
-
-- **项目对外名称：Q飞牛+**；GitHub 仓库：**[MisiteQ/qfnplus-ha](https://github.com/MisiteQ/qfnplus-ha)**（仓库名不允许 `+`，故用合法等价写法）。
-- **集成 domain 固定为 `qfnplus`**（HA domain 不允许 `+`，故用合法等价写法；0.1.x 的 `qfnos` 已废弃，两者不可同时安装）。
-- 实体 object_id 统一 `qfnplus_` 前缀（如 `sensor.qfnplus_cpu_usage`）；友好名称为「设备名 + 实体名」的中文（如「Q飞牛+ CPU 使用率」「nvme0n1 温度」）。
-- 设备改名后**友好名称会随之更新，实体 ID 保持不变**（同一安装内）。
-
-## 安装
+## 📦 安装
 
 ### 方式一：HACS（推荐，发布后可用）
 
@@ -33,7 +35,7 @@
 3. 最终目录结构应为 `/config/custom_components/qfnplus/{__init__.py, manifest.json, ...}`
 4. **重启 Home Assistant**（设置 → 系统 → 右上角重启）。改代码后必须重启，UI 里的“重新加载”不会重新导入 Python 模块。
 
-## 配置
+## ⚙️ 配置
 
 设置 → 设备与服务 → 添加集成 → 搜索 **Q飞牛+**：
 
@@ -47,9 +49,11 @@
 
 口令变更后集成会自动发起重新认证（输入新口令即可）；连续输错 5 次会触发 fnmonitor 登录锁定（60 秒起翻倍），集成会提示稍后再试并自动退避。
 
-## 实体清单（0.2.0）
+## 📊 实体清单（0.2.0）
 
-主设备名「Q飞牛+」；每块物理盘一个子设备（盘名，如 `nvme0n1`）。所有实体的 object_id 均为 `qfnplus_` 前缀。**[诊断] = entity_category diagnostic（默认不进主界面，实体列表里默认隐藏在「诊断」分组）；[默认禁用] = 需手动启用。**
+实体 object_id 统一 `qfnplus_` 前缀（如 `sensor.qfnplus_cpu_usage`）；友好名称为「设备名 + 实体名」的中文（如「Q飞牛+ CPU 使用率」「nvme0n1 温度」）。设备改名后**友好名称会随之更新，实体 ID 保持不变**（同一安装内）。
+
+主设备名「Q飞牛+」；每块物理盘一个子设备（盘名，如 `nvme0n1`）。**[诊断] = entity_category diagnostic（默认不进主界面，实体列表里默认隐藏在「诊断」分组）；[默认禁用] = 需手动启用。**
 
 ### 主设备（静态）
 
@@ -93,7 +97,7 @@
 
 > 容器聚合只做整层计数，不展开单容器（预留以后 opt-in 展开）。
 
-## 排错
+## 🔧 排错
 
 1. **打开调试日志**：`configuration.yaml` 加：
    ```yaml
@@ -110,13 +114,13 @@
    - 集成反复重试 setup：首次刷新失败会按退避自动重试，恢复后自动上线。
 3. **下载诊断**：设备页 → 下载诊断，输出已自动脱敏口令，便于提 issue。
 
-## 隐私与安全
+## 🔒 隐私与安全
 
 - 集成只读，绝不调用 fnmonitor 的 POST 动作类接口（docker/vm action 等）。
 - 登录口令仅保存在该配置条目（`.storage/core.config_entries`，HA 通用明文落盘行为），绝不写入日志；诊断输出已显式脱敏。
 - fnmonitor 仅明文 HTTP，建议仅在局域网内使用。
 
-## 开发
+## 🛠️ 开发
 
 ```powershell
 python -m venv .venv; .venv\Scripts\Activate.ps1      # Windows PowerShell
@@ -127,23 +131,23 @@ python scripts/package_sideload.py                  # 打侧载包
 
 测试 fixture（`tests/fixtures/overview.json`）按 fnmonitor v2.20.0 真实 `/api/overview` 返回结构编写，字段名以 fnmonitor 源码为准，未臆造字段。
 
-## 版本说明
+## 📝 版本说明
 
 - **0.2.1**：发布前修复——manifest/README 接入真实仓库（MisiteQ/qfnplus-ha）；lovelace 仪表盘实体 ID 与源码对齐（`load_1/5/15`、`memory_percent`、`swap_percent`、`volume_*_percent`、`energy_month`，移除永不生成的 OVS 网卡项）；更换品牌图标；移除测试注释中的真实内网 IP；LICENSE 署名更正为 MisiteQ。
 - **0.2.0**
-  - 命名统一：对外名称「Q飞牛+」（仓库可名 QFN+），domain `qfnos` → `qfnplus`（**破坏性变更，见迁移章节**）；主设备名固定「Q飞牛+」，磁盘子设备直接用盘名，实体名去重复（不再出现「磁盘 nvme0n1 硬盘 nvme0n1 健康」）。
+  - 命名统一：对外名称「Q飞牛+」（仓库可名 QFN+），domain `qfnos` → `qfnplus`（**破坏性变更**，两者不可同时安装）；主设备名固定「Q飞牛+」，磁盘子设备直接用盘名，实体名去重复（不再出现「磁盘 nvme0n1 硬盘 nvme0n1 健康」）。
   - 实体 object_id 统一 `qfnplus_` 前缀。
   - 新增：Docker 容器聚合（运行/停止/异常计数 + problem）、每盘 SMART 诊断（通电时间/重映射/待映射/不可纠正）、磁盘 IO（整机读写速率与 IOPS + 每盘速率）、GPU 利用率/频率、每网卡累计收发字节与丢包/错误；虚拟口过滤补充 OVS（`ovs-system`、`eno1-ovs`）。
 - **0.1.1**：修复面板开启口令后登录失败（aiohttp CookieJar 丢弃 IP 主机会话 cookie）。
 - **0.1.0**：首个版本，47 个实体。
 
-## 已知限制
+## ⚠️ 已知限制
 
 - fnmonitor 无稳定机器标识（无序列号/machine-id），实体 unique_id 以配置条目 ID 为前缀；同一主机按 host:port 防重复添加。
 - 磁盘子设备以盘名（sda/nvme0n1）标识；每张物理网卡不创建独立设备。
 - 今日/本月用电来自 fnmonitor 历史库，依赖 fnmonitor 自身采样连续性。
 - SMART 诊断依赖 fnmonitor 巡检缓存（默认 6h 一轮），休眠盘沿用上次活跃值。
 
-## License
+## 📄 License
 
 MIT

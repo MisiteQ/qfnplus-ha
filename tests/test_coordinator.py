@@ -242,8 +242,8 @@ async def test_low_frequency_throttle(hass, overview_fixture):
         assert mocks["async_get_disk_health"].await_count == 1
         assert mocks["async_get_overview"].await_count == 2
 
-        # 节流窗口外（时间戳重置）：重新拉取
-        coordinator._last_fetch["traffic"] = 0.0
+        # 节流窗口外（删除时间戳 = 从未取过）：重新拉取
+        del coordinator._last_fetch["traffic"]
         async_fire_time_changed(
             hass, dt_util.utcnow() + timedelta(seconds=DEFAULT_SCAN_INTERVAL + 1)
         )
@@ -263,8 +263,8 @@ async def test_sub_fetch_failure_keeps_overview_alive(hass, overview_fixture):
         assert mocks["async_get_traffic"].await_count == 1
 
         # 显式重置节流窗口：hass mock 时钟不推进 time.monotonic()，
-        # 不重置则 traffic 被节流跳过、失败路径根本不会执行（旧用例空转根因）
-        coordinator._last_fetch["traffic"] = 0.0
+        # 删除时间戳 = 从未取过（CI 新机 monotonic 小，置 0.0 不算过期）
+        del coordinator._last_fetch["traffic"]
         mocks["async_get_traffic"].side_effect = FnOsConnectError("traffic down")
         async_fire_time_changed(
             hass, dt_util.utcnow() + timedelta(seconds=DEFAULT_SCAN_INTERVAL + 1)

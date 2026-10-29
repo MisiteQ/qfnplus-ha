@@ -76,7 +76,11 @@ class FnOsDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 }
                 now = time.monotonic()
                 for key, throttle, method in SUB_FETCHES:
-                    if now - self._last_fetch.get(key, 0.0) < throttle:
+                    last = self._last_fetch.get(key)
+                    # None 哨兵：从未取过必须立即取。不能用 0.0 默认值——
+                    # CI 新机 monotonic 开机计数小，now - 0.0 < throttle
+                    # 会把大 throttle 端点（disk_health 300s）首轮误跳过
+                    if last is not None and now - last < throttle:
                         # 节流跳过：沿用上一轮成功值，避免 30s 档下
                         # 流量/能耗/进程传感器周期性闪 unknown
                         if self.data and key in self.data:
