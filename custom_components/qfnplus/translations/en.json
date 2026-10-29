@@ -1,0 +1,98 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Q飞牛+",
+        "description": "Connect to fnmonitor on your fnOS NAS. If login password protection is disabled on the panel, leave the password empty.",
+        "data": {
+          "host": "Host (LAN IP of the fnOS NAS)",
+          "port": "Port",
+          "password": "Password (empty when auth is disabled)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate {name}",
+        "description": "The stored password was rejected by fnmonitor. Enter the current login password.",
+        "data": {
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to fnmonitor. Check the host and port.",
+      "invalid_auth": "Wrong login password, please retry.",
+      "invalid_host": "Invalid host. Enter a bare hostname or IP (no http://, path or spaces).",
+      "login_locked": "Too many failed logins, the NAS temporarily locked login attempts. Wait a minute or two and try again.",
+      "unknown": "Unexpected error, check the logs."
+    },
+    "abort": {
+      "already_configured": "This fnmonitor host is already configured.",
+      "reauth_successful": "Re-authentication was successful.",
+      "reauth_entry_gone": "The entry being re-authenticated no longer exists."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Q飞牛+ options",
+        "description": "Polling interval for /api/overview. Low-frequency data (traffic, power stats, processes, disk health) is throttled separately.",
+        "data": {
+          "scan_interval": "Polling interval"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "cpu_usage": {"name": "CPU usage"},
+      "load_1": {"name": "CPU load (1m)"},
+      "load_5": {"name": "CPU load (5m)"},
+      "load_15": {"name": "CPU load (15m)"},
+      "memory_used": {"name": "Memory used"},
+      "memory_total": {"name": "Memory total"},
+      "memory_percent": {"name": "Memory usage"},
+      "swap_used": {"name": "Swap used"},
+      "swap_percent": {"name": "Swap usage"},
+      "storage_usage": {"name": "Storage usage"},
+      "uptime": {"name": "Uptime"},
+      "cpu_temperature": {"name": "CPU temperature"},
+      "board_temperature": {"name": "Board temperature"},
+      "power": {"name": "Power"},
+      "energy_today": {"name": "Energy today"},
+      "energy_month": {"name": "Energy this month"},
+      "net_down_rate": {"name": "Download rate"},
+      "net_up_rate": {"name": "Upload rate"},
+      "top_process": {"name": "Top CPU process"},
+      "volume_used": {"name": "Volume {mount} used"},
+      "volume_total": {"name": "Volume {mount} size"},
+      "volume_percent": {"name": "Volume {mount} usage"},
+      "nic_rx_rate": {"name": "{iface} download"},
+      "nic_tx_rate": {"name": "{iface} upload"},
+      "nic_total_rx": {"name": "{iface} total received"},
+      "nic_total_tx": {"name": "{iface} total sent"},
+      "nic_drop": {"name": "{iface} total drops"},
+      "nic_errs": {"name": "{iface} total errors"},
+      "disk_temperature": {"name": "Temperature"},
+      "disk_power_on_hours": {"name": "Power-on hours"},
+      "disk_reallocated_sectors": {"name": "Reallocated sectors"},
+      "disk_pending_sectors": {"name": "Pending sectors"},
+      "disk_uncorrectable": {"name": "Uncorrectable sectors"},
+      "disk_read_rate": {"name": "Read rate"},
+      "disk_write_rate": {"name": "Write rate"},
+      "disk_io_read_rate": {"name": "Disk read rate"},
+      "disk_io_write_rate": {"name": "Disk write rate"},
+      "disk_io_read_iops": {"name": "Disk read IOPS"},
+      "disk_io_write_iops": {"name": "Disk write IOPS"},
+      "gpu_utilization": {"name": "GPU utilization"},
+      "gpu_frequency": {"name": "GPU frequency"},
+      "docker_running": {"name": "Containers running"},
+      "docker_stopped": {"name": "Containers stopped"},
+      "docker_abnormal": {"name": "Containers abnormal"},
+      "fan_rpm": {"name": "Fan {fan} speed"}
+    },
+    "binary_sensor": {
+      "disk_health": {"name": "Health"},
+      "docker_problem": {"name": "Container problem"}
+    }
+  }
+}

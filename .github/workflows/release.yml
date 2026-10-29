@@ -1,0 +1,79 @@
+# 发版：Actions → release → Run workflow（填版本号，如 0.2.1）
+# 流程：回归测试 → 打侧载包 → 建 Release（挂 qfnplus-sideload.zip）
+# HACS 以仓库内容为安装源；Release 的 zip 供手动侧载用户下载。
+
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "版本号（三段纯数字，须与 manifest.json 一致，如 0.2.1）"
+        required: true
+        type: string
+      notes:
+        description: "本次更新说明（可留空）"
+        required: false
+        default: ""
+        type: string
+      draft:
+        description: "存为草稿（确认后手动发布）"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: 版本号与 manifest.json 一致性校验
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -e
+          MANIFEST_VER=$(python3 -c "import json; print(json.load(open('custom_components/qfnplus/manifest.json'))['version'])")
+          if [ "$MANIFEST_VER" != "$VERSION" ]; then
+            echo "::error::manifest.json 版本 $MANIFEST_VER 与输入 $VERSION 不一致"
+            exit 1
+          fi
+
+      - name: 回归测试
+        run: |
+          set -e
+          pip install -r requirements_test.txt
+          pytest
+
+      - name: 打侧载包
+        run: python3 scripts/package_sideload.py
+
+      - name: 发布到 Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+          NOTES: ${{ inputs.notes }}
+          DRAFT: ${{ inputs.draft }}
+        run: |
+          set -e
+          ARGS=""
+          if [ "$DRAFT" = "true" ]; then ARGS="--draft"; fi
+          BODY="$NOTES"
+          if [ -z "$BODY" ]; then BODY="Q飞牛+ v$VERSION"; fi
+          gh release create "v$VERSION" \
+            "dist/qfnplus-sideload.zip" \
+            --title "v$VERSION" \
+            --notes "$BODY" \
+            $ARGS

@@ -1,0 +1,7 @@
+# Test dependencies for the Q飞牛+ integration.
+# pytest-homeassistant-custom-component 跟随 HA 最新版自动更新；
+# CI 建议按目标 HA 版本钉住 minor 版本（minor 变化代表抽取逻辑变化）。
+pytest>=8.0
+pytest-asyncio>=0.23
+pytest-homeassistant-custom-component>=0.13.190,<0.14
+pytest-cov>=5.0

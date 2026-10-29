@@ -1,0 +1,12 @@
+{
+  "domain": "qfnplus",
+  "name": "Q飞牛+",
+  "codeowners": ["@MisiteQ"],
+  "config_flow": true,
+  "documentation": "https://github.com/MisiteQ/qfnplus-ha",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/MisiteQ/qfnplus-ha/issues",
+  "requirements": [],
+  "version": "0.2.1"
+}

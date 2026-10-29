@@ -1,0 +1,273 @@
+# =====================================================================
+# Q飞牛+ NAS 仪表盘 · 原生卡片版（gauge / glance / entities / grid /
+# vertical-stack / history-graph / markdown，全部 HA 内置，不依赖任何 HACS 前端资源）
+# 实体 ID 全部依据 0.2.0 源码推导（sensor.py / binary_sensor.py 的 entity_id 提示）：
+#   静态实体 = sensor.qfnplus_<key>；卷 = volume_<slug(mount)>_<used|total|percent>；
+#   网卡 = nic_<slug(iface)>_<rx_rate|tx_rate|total_rx|total_tx>；盘 = disk_<盘名>_*；
+#   整机 IO = disk_io_*；Docker = docker_*；GPU = gpu_<slug(名称)或gpuN>_*。
+# 用户尚未完成 0.2.0 迁移：多数 ID 源码即可确定；卷 key 取决于实际 mount 列表、
+# GPU 识别名取决于运行时数据——迁移后到 开发者工具 → 状态 搜索 qfnplus_ 核对。
+# 导入：设置 → 仪表盘 → 新建仪表盘 → 右上角铅笔编辑 → 原始编辑器粘贴 → 保存。
+# =====================================================================
+title: Q飞牛+
+views:
+  - title: Q飞牛+
+    path: qfnplus
+    cards:
+      # ---------------- 顶部标题（一行摘要，全部带状态守卫） ----------------
+      - type: markdown
+        content: >-
+          ### Q飞牛+
+
+          {% set up = states('sensor.qfnplus_uptime') %}
+          {% set pw = states('sensor.qfnplus_power') %}
+          {% set disks = ['binary_sensor.qfnplus_disk_nvme0n1_health',
+                          'binary_sensor.qfnplus_disk_nvme1n1_health',
+                          'binary_sensor.qfnplus_disk_sda_health'] %}
+          {% set bad = disks | select('is_state', 'on') | list | count %}
+          已运行 {{ relative_time(as_datetime(up)) if up not in ['unknown', 'unavailable'] else '未知' }} ·
+          {{ '磁盘全部健康' if bad == 0 else bad ~ ' 块盘需要关注' }} ·
+          实时功耗 {{ pw if pw not in ['unknown', 'unavailable'] else '—' }} W
+
+      # ---------------- 状态条：3 盘健康（problem 着色）+ 关键读数 ----------------
+      - type: glance
+        title: 状态速览
+        columns: 3
+        state_color: true
+        entities:
+          - entity: binary_sensor.qfnplus_disk_nvme0n1_health
+            name: nvme0n1
+          - entity: binary_sensor.qfnplus_disk_nvme1n1_health
+            name: nvme1n1
+          - entity: binary_sensor.qfnplus_disk_sda_health
+            name: sda
+          - entity: sensor.qfnplus_cpu_temperature
+            name: CPU 温度
+          - entity: sensor.qfnplus_power
+            name: 实时功耗
+          - entity: sensor.qfnplus_energy_month
+            name: 本月用电
+
+      # ---------------- 三环（grid 三等分，尺寸克制） ----------------
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: gauge
+            entity: sensor.qfnplus_cpu_usage
+            name: CPU
+            unit: '%'
+            needle: true
+            min: 0
+            max: 100
+            severity:
+              green: 0
+              yellow: 60
+              red: 85
+          - type: gauge
+            entity: sensor.qfnplus_memory_percent
+            name: 内存
+            unit: '%'
+            needle: true
+            min: 0
+            max: 100
+            severity:
+              green: 0
+              yellow: 70
+              red: 90
+          - type: gauge
+            entity: sensor.qfnplus_storage_usage
+            name: 存储
+            unit: '%'
+            needle: true
+            min: 0
+            max: 100
+            severity:
+              green: 0
+              yellow: 80
+              red: 92
+
+      # ---------------- 系统区 ----------------
+      - type: glance
+        title: 系统状态
+        columns: 3
+        entities:
+          - entity: sensor.qfnplus_load_1
+            name: 负载 1 分钟
+          - entity: sensor.qfnplus_load_5
+            name: 负载 5 分钟
+          - entity: sensor.qfnplus_load_15
+            name: 负载 15 分钟
+          - entity: sensor.qfnplus_memory_used
+            name: 内存已用
+          - entity: sensor.qfnplus_memory_total
+            name: 内存总量
+          - entity: sensor.qfnplus_swap_percent
+            name: Swap 使用率
+      - type: entities
+        title: 运行信息
+        entities:
+          - entity: sensor.qfnplus_swap_used
+            name: Swap 已用
+          - entity: sensor.qfnplus_uptime
+            name: 运行时长
+            format: relative_time
+
+      # ---------------- 容器（0.2.0 新增） ----------------
+      # 源码可确定（docker available 时才创建实体；未装 Docker 则无此组实体）
+      - type: glance
+        title: 容器
+        columns: 2
+        state_color: true
+        entities:
+          - entity: sensor.qfnplus_docker_running
+            name: 运行中
+            icon: mdi:docker
+          - entity: sensor.qfnplus_docker_stopped
+            name: 已停止
+            icon: mdi:pause-circle-outline
+          - entity: sensor.qfnplus_docker_abnormal
+            name: 异常
+            icon: mdi:alert-circle-outline
+          - entity: binary_sensor.qfnplus_docker_problem
+            name: 容器状态
+            icon: mdi:container-generic
+
+      # ---------------- GPU（识别名取决于运行时数据，暂注释；迁移后按注册表启用） ----------------
+      # 源码规则：gkey = slug(GPU 名称)（如 "Intel UHD 730" → intel_uhd_730），名称为空回退 gpu<序号>；
+      # sensor.qfnplus_gpu_<gkey>_utilization / _frequency（frequency 单位 MHz）
+      # 迁移后在 开发者工具→状态 搜索 qfnplus_gpu_，把下面 gpu0 换成实际 gkey 再解除注释：
+      # - type: glance
+      #   title: GPU
+      #   columns: 2
+      #   entities:
+      #     - entity: sensor.qfnplus_gpu_gpu0_utilization
+      #       name: GPU 利用率
+      #     - entity: sensor.qfnplus_gpu_gpu0_frequency
+      #       name: GPU 频率
+
+      # ---------------- 存储区 ----------------
+      # 新增卷后：在下面两张卡各加一项，把 volN 换成新卷 key（如 vol4）
+      - type: glance
+        title: 存储卷用量
+        columns: 3
+        entities:
+          # key 规则源码确定：slug(mount)（"/"→空→回退 root）；卷清单取决于实际 mount
+          - entity: sensor.qfnplus_volume_root_percent
+            name: /
+          - entity: sensor.qfnplus_volume_fs_percent
+            name: /fs
+          - entity: sensor.qfnplus_volume_vol1_percent
+            name: /vol1
+          - entity: sensor.qfnplus_volume_vol2_percent
+            name: /vol2
+          - entity: sensor.qfnplus_volume_vol3_percent
+            name: /vol3
+      # 新增盘后：在下方两张卡各加温度 + 健康项（把 nvme0n1 换成新盘名）
+      - type: glance
+        title: 物理磁盘
+        columns: 3
+        state_color: true
+        entities:
+          - entity: sensor.qfnplus_disk_nvme0n1_temperature
+            name: nvme0n1 温度
+          - entity: sensor.qfnplus_disk_nvme1n1_temperature
+            name: nvme1n1 温度
+          - entity: sensor.qfnplus_disk_sda_temperature
+            name: sda 温度
+          - entity: binary_sensor.qfnplus_disk_nvme0n1_health
+            name: nvme0n1 健康
+          - entity: binary_sensor.qfnplus_disk_nvme1n1_health
+            name: nvme1n1 健康
+          - entity: binary_sensor.qfnplus_disk_sda_health
+            name: sda 健康
+      - type: entities
+        title: 卷已用空间
+        entities:
+          # key 规则源码确定（卷实体为 used / total / percent 三件套）
+          - entity: sensor.qfnplus_volume_root_used
+            name: / 已用
+          - entity: sensor.qfnplus_volume_fs_used
+            name: /fs 已用
+          - entity: sensor.qfnplus_volume_vol1_used
+            name: /vol1 已用
+          - entity: sensor.qfnplus_volume_vol2_used
+            name: /vol2 已用
+          - entity: sensor.qfnplus_volume_vol3_used
+            name: /vol3 已用
+
+      # ---------------- 磁盘 IO（0.2.0 新增） ----------------
+      # 源码可确定（io_total_specs hint = qfnplus_disk_io_*，仅聚合物理盘防重复计数）
+      - type: glance
+        title: 磁盘 IO
+        columns: 2
+        entities:
+          - entity: sensor.qfnplus_disk_io_read_rate
+            name: 读取速率
+            icon: mdi:read
+          - entity: sensor.qfnplus_disk_io_write_rate
+            name: 写入速率
+            icon: mdi:pencil
+          - entity: sensor.qfnplus_disk_io_read_iops
+            name: 读 IOPS
+            icon: mdi:speedometer
+          - entity: sensor.qfnplus_disk_io_write_iops
+            name: 写 IOPS
+            icon: mdi:speedometer
+
+      # ---------------- 网络区 ----------------
+      # 源码规则：nic_<slug(iface)>_rx_rate/_tx_rate/_total_rx/_total_tx；
+      # 虚拟网卡被集成过滤（ovs* 前缀、*-ovs 后缀），eno1-ovs / ovs-system 不会建实体
+      - type: glance
+        title: 网卡速率
+        columns: 2
+        entities:
+          - entity: sensor.qfnplus_nic_eno1_rx_rate
+            name: eno1 ↓
+          - entity: sensor.qfnplus_nic_eno1_tx_rate
+            name: eno1 ↑
+          - entity: sensor.qfnplus_nic_wlp3s0_rx_rate
+            name: wlp3s0 ↓
+          - entity: sensor.qfnplus_nic_wlp3s0_tx_rate
+            name: wlp3s0 ↑
+      # 源码另有整机聚合速率（静态实体，未上卡，按需自行加入）：
+      # sensor.qfnplus_net_down_rate / sensor.qfnplus_net_up_rate
+      - type: history-graph
+        title: 网络流量（24 小时）
+        hours_to_show: 24
+        entities:
+          - entity: sensor.qfnplus_nic_eno1_rx_rate
+            name: eno1 下行
+          - entity: sensor.qfnplus_nic_eno1_tx_rate
+            name: eno1 上行
+      # 网络累计（0.2.0 新增，统计用）：源码可确定（nic_total_rx / nic_total_tx）
+      - type: glance
+        title: 累计流量
+        columns: 2
+        entities:
+          - entity: sensor.qfnplus_nic_eno1_total_rx
+            name: eno1 累计 ↓
+          - entity: sensor.qfnplus_nic_eno1_total_tx
+            name: eno1 累计 ↑
+          - entity: sensor.qfnplus_nic_wlp3s0_total_rx
+            name: wlp3s0 累计 ↓
+          - entity: sensor.qfnplus_nic_wlp3s0_total_tx
+            name: wlp3s0 累计 ↑
+
+      # ---------------- 电源区 ----------------
+      - type: glance
+        title: 用电
+        columns: 3
+        entities:
+          - entity: sensor.qfnplus_power
+            name: 实时功耗
+          - entity: sensor.qfnplus_energy_today
+            name: 今日用电
+          - entity: sensor.qfnplus_energy_month
+            name: 本月用电
+      - type: history-graph
+        title: 实时功耗（24 小时）
+        hours_to_show: 24
+        entities:
+          - entity: sensor.qfnplus_power
+            name: 功耗

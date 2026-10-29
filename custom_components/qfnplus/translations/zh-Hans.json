@@ -1,0 +1,98 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Q飞牛+",
+        "description": "连接飞牛 fnOS 上的 fnmonitor。若面板未开启登录口令保护，密码留空即可。",
+        "data": {
+          "host": "主机地址（fnOS 的局域网 IP）",
+          "port": "端口",
+          "password": "登录口令（未开启口令时留空）"
+        }
+      },
+      "reauth_confirm": {
+        "title": "重新认证 {name}",
+        "description": "fnmonitor 拒绝了已保存的口令，请输入当前登录口令。",
+        "data": {
+          "password": "登录口令"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "无法连接到 fnmonitor，请检查地址与端口。",
+      "invalid_auth": "登录口令错误，请重试。",
+      "invalid_host": "主机地址无效。请直接填写主机名或 IP（不要带 http://、路径或空格）。",
+      "login_locked": "登录失败次数过多，NAS 已临时锁定登录，请等待一两分钟后再试。",
+      "unknown": "发生未知错误，请查看日志。"
+    },
+    "abort": {
+      "already_configured": "该 fnmonitor 主机已配置过。",
+      "reauth_successful": "重新认证成功。",
+      "reauth_entry_gone": "正在重新认证的集成条目已不存在。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Q飞牛+ 选项",
+        "description": "/api/overview 轮询间隔。低频数据（流量、功耗统计、进程、磁盘健康）另行节流。",
+        "data": {
+          "scan_interval": "轮询间隔"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "cpu_usage": {"name": "CPU 使用率"},
+      "load_1": {"name": "CPU 负载（1 分钟）"},
+      "load_5": {"name": "CPU 负载（5 分钟）"},
+      "load_15": {"name": "CPU 负载（15 分钟）"},
+      "memory_used": {"name": "内存已用"},
+      "memory_total": {"name": "内存总量"},
+      "memory_percent": {"name": "内存使用率"},
+      "swap_used": {"name": "Swap 已用"},
+      "swap_percent": {"name": "Swap 使用率"},
+      "storage_usage": {"name": "存储使用率"},
+      "uptime": {"name": "运行时长"},
+      "cpu_temperature": {"name": "CPU 温度"},
+      "board_temperature": {"name": "主板温度"},
+      "power": {"name": "实时功耗"},
+      "energy_today": {"name": "今日用电"},
+      "energy_month": {"name": "本月用电"},
+      "net_down_rate": {"name": "下行速率"},
+      "net_up_rate": {"name": "上行速率"},
+      "top_process": {"name": "CPU 占用最高进程"},
+      "volume_used": {"name": "存储卷 {mount} 已用空间"},
+      "volume_total": {"name": "存储卷 {mount} 总容量"},
+      "volume_percent": {"name": "存储卷 {mount} 使用率"},
+      "nic_rx_rate": {"name": "{iface} 下行速率"},
+      "nic_tx_rate": {"name": "{iface} 上行速率"},
+      "nic_total_rx": {"name": "{iface} 累计接收"},
+      "nic_total_tx": {"name": "{iface} 累计发送"},
+      "nic_drop": {"name": "{iface} 累计丢包"},
+      "nic_errs": {"name": "{iface} 累计错误"},
+      "disk_temperature": {"name": "温度"},
+      "disk_power_on_hours": {"name": "通电时间"},
+      "disk_reallocated_sectors": {"name": "重映射扇区"},
+      "disk_pending_sectors": {"name": "待映射扇区"},
+      "disk_uncorrectable": {"name": "不可纠正扇区"},
+      "disk_read_rate": {"name": "读速率"},
+      "disk_write_rate": {"name": "写速率"},
+      "disk_io_read_rate": {"name": "磁盘读速率"},
+      "disk_io_write_rate": {"name": "磁盘写速率"},
+      "disk_io_read_iops": {"name": "磁盘读 IOPS"},
+      "disk_io_write_iops": {"name": "磁盘写 IOPS"},
+      "gpu_utilization": {"name": "GPU 利用率"},
+      "gpu_frequency": {"name": "GPU 频率"},
+      "docker_running": {"name": "运行中容器"},
+      "docker_stopped": {"name": "已停止容器"},
+      "docker_abnormal": {"name": "异常容器"},
+      "fan_rpm": {"name": "风扇 {fan} 转速"}
+    },
+    "binary_sensor": {
+      "disk_health": {"name": "健康"},
+      "docker_problem": {"name": "容器异常"}
+    }
+  }
+}
